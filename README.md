@@ -1,7 +1,10 @@
 # explore-openai
 
 - [explore-openai](#explore-openai)
-This repository has all the code thats covered in the explore openai course
+  - [Python Installation](#python-installation)
+    - [Python installation using pyenv](#python-installation-using-pyenv)
+    - [Windows](#windows)
+  - [Poetry](#poetry)
 
 ## Python Installation
 
