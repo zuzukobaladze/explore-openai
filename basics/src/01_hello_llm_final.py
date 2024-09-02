@@ -6,7 +6,8 @@ from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 
 load_dotenv()
-
+ 
+# /Users/dilipbandlasundarraj/Library/Caches/pypoetry/virtualenvs/explore-open-ai-KYBxKqRJ-py3.12
 client = OpenAI()
 LLM = os.environ.get("OPEN_AI_MODEL")
 
