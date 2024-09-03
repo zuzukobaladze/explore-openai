@@ -3,8 +3,8 @@
 - [explore-openai](#explore-openai)
   - [Python Installation](#python-installation)
     - [Python installation using pyenv](#python-installation-using-pyenv)
-    - [MAC](#mac)
-    - [Windows](#windows)
+      - [mac](#mac)
+      - [Windows](#windows)
   - [Poetry](#poetry)
 
 ## Python Installation
@@ -13,11 +13,11 @@
 
 [What is pyenv](https://chatgpt.com/share/af70c8b1-1410-4bdb-843d-765dc0c344d6)
 
-### MAC
+#### mac
 
 - [Installation Instructions](https://chatgpt.com/share/2a4177fb-6685-47a9-b8cb-853dcddd440b)
 
-### Windows
+#### Windows
 
 - [Installation Instructions](https://chatgpt.com/share/4700f100-0afb-456d-9814-8f7f78d533f5)
 
