@@ -6,8 +6,7 @@ from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 
 load_dotenv()
- 
-# /Users/dilipbandlasundarraj/Library/Caches/pypoetry/virtualenvs/explore-open-ai-KYBxKqRJ-py3.12
+
 client = OpenAI()
 LLM = os.environ.get("OPEN_AI_MODEL")
 
@@ -56,28 +55,3 @@ if __name__ == "__main__":
     # Pretty print the entire response
     response_dict = response.to_dict()
     print(json.dumps(response_dict, indent=4))
-
-    system_message = """
-    You are a helpful assistant who will help me with python programming related questions! If there are any other irrelevant questions are asked then you can respond with I don't know in a funny way!
-    """
-
-    # response = client.chat.completions.create(
-    #     model=LLM,
-    #     # Conversation as a list of messages.
-    #     messages=[
-    #         {"role": "system", "content": system_message},
-    #         {
-    #             "role": "user",
-    #             "content": "Are there other measures than time complexity for an \
-    #             algorithm?",
-    #         },
-    #         {
-    #             "role": "system",
-    #             "content": "Yes, there are other measures besides time complexity \
-    #             for an algorithm, such as space complexity.",
-    #         },
-    #         {"role": "user", "content": "What is it?"},
-    #     ],
-    # )
-
-    # print(f"response : {response.choices[0].message.content}")
