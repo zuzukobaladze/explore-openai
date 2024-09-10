@@ -31,7 +31,7 @@
 - [Poetry Installation and Usage inn Mac](https://chatgpt.com/share/b78da5c8-09c7-4892-8bb7-9dab2f5391dc)
   - Poetry installation Path in my machine 
     ```
-    /Users/dilipbandlasundarraj/Library/Caches/pypoetry/virtualenvs/explore-open-ai-KYBxKqRJ-py3.12
+    /Users/dilipbandlasundarraj/Library/Caches/pypoetry/virtualenvs/explore-open-ai-KYBxKqRJ-py3.12/bin/python
     ```
 
 - [Poetry Installation and Usage in Windows](https://chatgpt.com/share/a4313c86-9f65-4b14-b970-220f170102b8)
