@@ -5,6 +5,7 @@
     - [Python installation using pyenv](#python-installation-using-pyenv)
       - [mac](#mac)
       - [Windows](#windows)
+  - [Popular Build/Dependency Management tools in python](#popular-builddependency-management-tools-in-python)
   - [Poetry](#poetry)
 
 ## Python Installation
@@ -21,6 +22,9 @@
 
 - [Installation Instructions](https://chatgpt.com/share/4700f100-0afb-456d-9814-8f7f78d533f5)
 
+## Popular Build/Dependency Management tools in python 
+
+[Build Tools in Python](https://chatgpt.com/share/4802326b-4beb-4948-89c3-27557eeacdf7)
 
 ## Poetry 
 
