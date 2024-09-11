@@ -7,6 +7,7 @@
       - [Windows](#windows)
   - [Popular Build/Dependency Management tools in python](#popular-builddependency-management-tools-in-python)
   - [Poetry](#poetry)
+  - [Setup .env file](#setup-env-file)
 
 ## Python Installation
 
@@ -36,3 +37,9 @@
 
 - [Poetry Installation and Usage in Windows](https://chatgpt.com/share/a4313c86-9f65-4b14-b970-220f170102b8)
 
+## Setup .env file
+
+```
+OPEN_AI_MODEL="gpt-4o"
+OPENAI_API_KEY=
+```
