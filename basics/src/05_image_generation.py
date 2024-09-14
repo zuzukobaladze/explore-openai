@@ -1,12 +1,13 @@
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
+import os
 
 load_dotenv()
 
 client = OpenAI()
-LLM = "gpt-4o"
-image_url = "https://www.invoicesimple.com/wp-content/uploads/2018/06/Sample-Invoice-printable.png"
+LLM = os.environ.get("OPEN_AI_MODEL")
+
 
 
 # Call the openai chat.completions endpoint

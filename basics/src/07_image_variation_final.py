@@ -1,16 +1,16 @@
 import requests
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.types.chat.chat_completion import ChatCompletion
-
+from openai.types.images_response import ImagesResponse
+import os
 load_dotenv()
 
 client = OpenAI()
-LLM = "gpt-4o"
+LLM = os.environ.get("OPEN_AI_MODEL")
 
 
 # Call the openai chat.completions endpoint
-def ask_openai(size="1024x1024") -> ChatCompletion:
+def ask_openai(size="1024x1024") -> ImagesResponse:
     print(f"LLM : {LLM}")
 
     response = client.images.create_variation(
@@ -28,7 +28,7 @@ def ask_openai(size="1024x1024") -> ChatCompletion:
 
 
 if __name__ == "__main__":
-    response: ChatCompletion = ask_openai()
+    response: ImagesResponse = ask_openai()
 
     # Pretty print the entire response
     image_url = response.data[0].url
