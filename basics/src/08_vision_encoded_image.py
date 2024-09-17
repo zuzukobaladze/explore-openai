@@ -4,25 +4,13 @@ import os
 
 import requests
 from dotenv import load_dotenv
-from openai import OpenAI
 
 load_dotenv()
 
-client = OpenAI()
 LLM = os.environ.get("OPEN_AI_MODEL")
 api_key = os.environ.get("OPENAI_API_KEY")
 
-
-# Function to encode the image
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
-
-
 image_path = "src/resources/invoice-template.png"
-
-base64_image = encode_image(image_path)
-
 
 # Call the openai chat.completions endpoint
 def ask_openai(
@@ -44,7 +32,6 @@ def ask_openai(
                     {"type": "text", "text": user_question},
                     {
                         "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
                     },
                 ],
             }
@@ -68,9 +55,3 @@ if __name__ == "__main__":
     """
 
     response = ask_openai(user_question)
-
-# Directly parse the response and pretty-print the JSON in one step
-    clean_content_json = json.dumps(
-        json.loads(response.json()["choices"][0]["message"]["content"]), indent=4
-    )
-    print(clean_content_json)

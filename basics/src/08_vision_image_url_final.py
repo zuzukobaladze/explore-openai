@@ -9,6 +9,7 @@ load_dotenv()
 
 client = OpenAI()
 LLM = os.environ.get("OPEN_AI_MODEL")
+# image_url = "https://drive.google.com/file/d/1tCgKNVxDTTivWG4LOHL1DOaaRuptztBH/edit"
 image_url = "https://drive.google.com/uc?export=view&id=1tCgKNVxDTTivWG4LOHL1DOaaRuptztBH"
 
 # Call the openai chat.completions endpoint
@@ -22,6 +23,19 @@ def ask_openai(
 
     response = client.chat.completions.create(
         model="gpt-4o",
+        response_format={"type": "json_object"},
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_question,
+                    },
+                    {"type": "image_url", "image_url": {"url": image_url}},
+                ],
+            }
+        ],
         temperature=temperature,
         max_tokens=max_tokens,
         top_p=top_p,
