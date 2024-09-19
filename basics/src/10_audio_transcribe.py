@@ -21,7 +21,9 @@ def ask_openai(
 
 if __name__ == "__main__":
     
+    # audio_path = "src/resources/RAG.mp3"
+        # YT_Link -> https://www.youtube.com/watch?v=T-D1OfcDW1M&t=20s
     # audio_path = "src/resources/Taylor_Swift_Delicate.mp3"
     audio_path = "src/resources/RAG.mp3"
-        # YT_Link -> https://www.youtube.com/watch?v=T-D1OfcDW1M&t=20s
+        
     # prompt = "This audio explains the concepts about RAG"

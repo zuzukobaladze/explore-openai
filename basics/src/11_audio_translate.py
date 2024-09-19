@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.resources.audio.transcriptions import Transcription
+from openai.resources.audio.transcriptions import Transcriptions
 from openai.resources.audio.translations import Translation
 load_dotenv()
 
