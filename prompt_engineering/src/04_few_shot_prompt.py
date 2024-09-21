@@ -28,9 +28,12 @@ def classify_prompt():
        "I am not able to login into the account. Please help me."
     """
     prompt = f"""
-         Categorize the following customer support query within the triple ticks into one of the categories: Billing Issue, Technical Support, Account Management, or General Inquiry:
+        Categorize the following customer support query within the triple ticks into one of the categories: Billing Issue, Technical Support, Account Management, or General Inquiry:
+        Please ignore the triple ticks in the resposne. \n
 
-        ```{text}```
+        ```
+        {text}
+        ```
     """
     response = ask_openai(prompt)
     print(f"response  : {response.choices[0].message.content}")
@@ -55,9 +58,12 @@ def classify_using_few_shot_prompting():
 
     """
     prompt = f"""
-         Categorize the following customer support query within the triple ticks into one of the categories: Billing Issue, Technical Support, Account Management, or General Inquiry:
+        Categorize the following customer support query within the triple ticks into one of the categories: Billing Issue, Technical Support, Account Management, or General Inquiry:
+        Please ignore the triple ticks in the resposne. \n
+        ```
+        {text}
 
-        ```{text}```
+        ```
     """
     response = ask_openai(prompt)
     print(f"response  : {response.choices[0].message.content}")
@@ -66,4 +72,4 @@ def classify_using_few_shot_prompting():
 
 if __name__ == "__main__":
     classify_prompt()
-    # classify_using_few_shot_prompting()
+    classify_using_few_shot_prompting()
