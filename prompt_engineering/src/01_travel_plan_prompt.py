@@ -64,29 +64,22 @@ def travel_prompt_no_system_message(input: str):
 if __name__ == "__main__":
     print("\n With Task : \n")
     task = """
-    
-    A family of three (two adults and a 4-year-old child) is planning a 5-day vacation to Paris, France. 
-    They want a mix of family-friendly activities, local cuisine experiences, and some relaxation time."
-
     "Create a 5-day itinerary that balances sightseeing, child-friendly activities, and authentic local dining. 
     Include recommendations for morning, afternoon, and evening activities each day."
-
-    This itenary is for two adults and a 4 year old. Include Family friendly activities, local cuisine experiences and relaxation time.
     """
     travel_prompt_no_system_message(input=task)
 
-    print("\n With Context and Task : \n")
-    context_task = """
+    # print("\n With Context and Task : \n")
+    # context_task = """
     
-    A family of three (two adults and a 4-year-old child) is planning a 5-day vacation to Paris, France. 
-    They want a mix of family-friendly activities, local cuisine experiences, and some relaxation time."
+    # A family of three (two adults and a 4-year-old child) is planning a 5-day vacation to Paris, France. 
+    # They want a mix of family-friendly activities, local cuisine experiences, and some relaxation time."
 
-    "Create a 5-day itinerary that balances sightseeing, child-friendly activities, and authentic local dining. 
-    Include recommendations for morning, afternoon, and evening activities each day."
+    # "Create a 5-day itinerary that balances sightseeing, child-friendly activities, and authentic local dining. 
+    # Include recommendations for morning, afternoon, and evening activities each day."
 
-    This itenary is for two adults and a 4 year old. Include Family friendly activities, local cuisine experiences and relaxation time.
-    """
-    travel_prompt_no_system_message(input=context_task)
+    # """
+    # travel_prompt_no_system_message(input=context_task)
 
-    print("\n With Role, Context and Task : \n")
-    travel_prompt(context_task)
+    # print("\n With Role, Context and Task : \n")
+    # travel_prompt(context_task)

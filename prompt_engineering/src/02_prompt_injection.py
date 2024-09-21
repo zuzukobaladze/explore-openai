@@ -9,6 +9,12 @@ load_dotenv()
 client = OpenAI()
 LLM = os.environ.get("OPEN_AI_MODEL")
 
+system_message = """
+        You are a text summarization assistant. Your task is to read the content provided between triple backticks (```) and generate a concise and coherent summary. 
+        Ensure that the key points and main ideas are retained, while keeping the summary brief and informative.
+    """
+
+
 
 def ask_openai(
     prompt: str,
