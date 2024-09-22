@@ -83,7 +83,7 @@ def simple_math_cot():
 
 if __name__ == "__main__":
     # COT Example 1
-    # simple_puzzle()
+    simple_puzzle()
     # simple_puzzle_cot()
 
     # COT Example 2
@@ -91,5 +91,5 @@ if __name__ == "__main__":
     # simple_puzzle1_cot()
 
     # Math Example
-    simple_math()
-    simple_math_cot()
+    # simple_math()
+    # simple_math_cot()
