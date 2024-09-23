@@ -1,0 +1,17 @@
+{
+    "name": "Emily Thompson",
+    "booking_date": "October 10, 2024",
+    "flight": {
+        "flight_number": "AA123",
+        "origin": "New York (JFK)",
+        "destination": "Los Angeles (LAX)",
+        "departure_time": "8:00 AM",
+        "arrival_time": "11:30 AM"
+    },
+    "luggage": {
+        "carry_on": "1",
+        "checked_bag": "1"
+    },
+    "ticket_price": "$450.00",
+    "seat_number": "14A"
+}

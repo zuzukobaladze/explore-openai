@@ -3,7 +3,6 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.types.chat.chat_completion import ChatCompletion
 
 load_dotenv()
 
@@ -13,14 +12,16 @@ LLM = os.environ.get("OPEN_AI_MODEL")
 
 def ask_openai(
     prompt: str,
-) -> ChatCompletion:
+    response_format: dict = {"type": "text"},
+):
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=LLM,
         messages=[
             {"role": "user", "content": prompt},
         ],
+        response_format=response_format,
     )
-    return response
+    return response.choices[0].message.content
 
 
 def the_reviewer(prompt_initialization, current_prompt):
@@ -33,7 +34,8 @@ def the_reviewer(prompt_initialization, current_prompt):
     detailing improvements that would make my prompt a perfect prompt 
     with a score of 5."""
 
-    reviews = ask_openai(prompt_reviewer)
+    reviews = ask_openai(prompt=prompt_reviewer)
+    print(f"reviews : {reviews}")
 
     return reviews
 
@@ -50,8 +52,7 @@ def the_questioner(prompt_initialization, current_prompt, reviews, questions_ans
     {'Questions': ['Question 1','Question 2','Question 3','Question 4']}"""
 
     questions_json = ask_openai(
-        prompt_questioner,
-        model="gpt-4-1106-preview",
+        prompt=prompt_questioner,
         response_format={"type": "json_object"},
     )
 
@@ -126,8 +127,8 @@ def promptor(initial_prompt, max_nb_iter=3):
 
 if __name__ == "__main__":
     prompt = promptor(
-        "Give me a suggestion for the main course for today's lunch.", max_nb_iter=3
+        "Give me a suggestion for the reducing weight and build muscles.", max_nb_iter=3
     )
     print(f"finalized prompt : {prompt}")
-    res = ask_openai(prompt)
+    res = ask_openai(prompt=prompt)
     print(res)

@@ -1,0 +1,27 @@
+{
+  "company": "Tesla",
+  "earnings_report": {
+    "date": "2024-10-19",
+    "revenue": {
+      "amount": 23.3,
+      "currency": "billion USD",
+      "analyst_expectations": 24.0
+    },
+    "net_income": {
+      "amount": 2.8,
+      "currency": "billion USD",
+      "growth_percentage": 12
+    }
+  },
+  "reasons_for_growth": [
+    "Strong vehicle sales in Europe",
+    "Strong vehicle sales in China"
+  ],
+  "future_plans": {
+    "expand_berlin_gigafactory": true,
+    "accelerate_cybertruck_production": true
+  },
+  "warnings": [
+    "Rising material costs could impact future profitability"
+  ]
+}
