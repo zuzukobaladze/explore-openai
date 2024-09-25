@@ -69,27 +69,6 @@ def ask_openai(
     return response
 
 
-def extract_flight_info():
-    text = """
-    Emily Thompson booked a flight on October 10, 2024. She will be flying from New York (JFK) to Los Angeles (LAX) on flight number AA123. 
-    The departure time is 8:00 AM, and the arrival time is 11:30 AM. She has a carry-on bag and a checked bag. 
-    Her ticket price was $450.00, and she will be seated in 14A.
-    """
-
-    prompt = f"""
-    Extract the key information from the following text delimited by triple backticks and format it in JSON.
-    I need details like name, booking date, flight information (flight number, origin, destination, departure/arrival times), 
-    luggage details, ticket price, and seat number.
-
-    Text: ```{text}```
-   
-
-    """
-    response = ask_openai(prompt=prompt)
-    # Print the Type and Response
-    return response
-
-
 def process_flight_info(json_data) -> Booking:
     # Load JSON data
     data = json.loads(json_data)

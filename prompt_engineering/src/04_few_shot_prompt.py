@@ -14,13 +14,12 @@ def ask_openai(
     prompt: str,
 ) -> ChatCompletion:
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=LLM,
         messages=[
             {"role": "user", "content": prompt},
         ],
     )
     return response
-
 
 
 def classify_prompt():
@@ -67,7 +66,6 @@ def classify_using_few_shot_prompting():
     """
     response = ask_openai(prompt)
     print(f"response  : {response.choices[0].message.content}")
-
 
 
 if __name__ == "__main__":
