@@ -66,7 +66,7 @@ class Person(BaseModel):
 
 def ask_openai(
     prompt: str,
-) -> ChatCompletion:
+) -> ParsedChatCompletion:
     # response = client.chat.completions.create(
     response = client.beta.chat.completions.parse(
         model="gpt-4o-2024-08-06",
@@ -79,20 +79,6 @@ def ask_openai(
     )
     return response
 
-
-def process_flight_info(json_data) -> Booking:
-    # Load JSON data
-    data = json.loads(json_data)
-
-    # Parse and validate using the Booking model
-    try:
-        booking = Booking(**data)
-        print("Validation Successful!")
-        print(booking.model_dump_json(indent=4, exclude_unset=True))
-        return booking
-    except ValidationError as e:
-        print("Validation Error:")
-        print(e.json(indent=4))
 
 
 def extract_flight_info_system_message():
@@ -118,31 +104,15 @@ def extract_flight_info_system_message():
     return response
 
 
-def person_extrction(prompt: str):
-    response: ParsedChatCompletion = ask_openai(prompt)
-    print(f"type : {type(response)}")
-    message = response.choices[0].message
-    print(f"message json : {message.content}")
-
-    if message.parsed:
-        # print(f"message  : {message.model_validate_json(Person)}")
-        person: Person = message.parsed
-        print(f"age : {person.age}")
-        print(f"name : {person.name}")
-
-
 if __name__ == "__main__":
-    # Person Extraction
-    prompt = "Max's age is 30 years"
-    person_extrction(prompt)
 
     # With System Message
-    # response: ParsedChatCompletion = extract_flight_info_system_message()
-    # # json_data = response.choices[0].message.content
-    # message = response.choices[0].message
-    # # print(f"message  : {message}")
-    # if message.parsed:
-    #     # print(f"message  : {message.model_validate_json(Person)}")
-    #     booking: Booking = message.parsed
-    #     print(f"booking : {booking}")
-    #     print(f"flight_info : {booking.flight_info}")
+    response: ParsedChatCompletion = extract_flight_info_system_message()
+    # json_data = response.choices[0].message.content
+    message = response.choices[0].message
+    # print(f"message  : {message}")
+    if message.parsed:
+        # print(f"message  : {message.model_validate_json(Person)}")
+        booking: Booking = message.parsed
+        print(f"booking : {booking}")
+        print(f"flight_info : {booking.flight_info}")
