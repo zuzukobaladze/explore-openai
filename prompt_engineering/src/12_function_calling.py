@@ -12,7 +12,7 @@ load_dotenv()
 client = OpenAI()
 LLM = os.environ.get("OPEN_AI_MODEL")
 system_message = """
-You are a helpful assistant, Id
+You are a helpful assistant!
 """
 
 
@@ -138,4 +138,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    response: ChatCompletion = ask_openai("Whats the current time in new york?")
+    print(f"response  : {response.choices[0].message.content}")
+
+    # main()
