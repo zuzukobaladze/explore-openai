@@ -68,7 +68,57 @@ def get_current_stock_value(ticker_symbol):
     ticker = yf.Ticker(ticker_symbol)
     todays_data = ticker.history(period="1d")
     print(todays_data.to_string(index=False))
-    return f"The stock price of {ticker_symbol} is,  {todays_data['Close'].iloc[0]}"
+    return f"The stock price of {ticker_symbol} is,  {todays_data["Close"].iloc[0]}"
+
+
+functions = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_weather",
+            "description": "Fetch current temperature/weather for given coordinates.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "description": "The latitude of the location to get the weather for.",
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "description": "The longitude of the location to get the weather for.",
+                    },
+                },
+                "required": ["latitude", "longitude"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_time",
+            "description": "Get the current system time.",
+            "parameters": {},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_stock_value",
+            "description": "Get the current stock value for a given ticker symbol.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ticker_symbol": {
+                        "type": "string",
+                        "description": "The ticker symbol to get the stock value for.",
+                    },
+                },
+                "required": ["ticker_symbol"],
+            },
+        },
+    },
+]
 
 
 def ask_openai(
@@ -80,6 +130,8 @@ def ask_openai(
             {"role": "system", "content": system_message},
             {"role": "user", "content": prompt},
         ],
+        tools=functions,
+        tool_choice="auto",
     )
     return response
 
@@ -87,22 +139,22 @@ def ask_openai(
 # Send the result back to the model
 
 
-# def send_tool_call_response(LLM, user_input, message, tool_name, result, tool_call_id):
-#     response = client.chat.completions.create(
-#         model=LLM,
-#         messages=[
-#             {"role": "system", "content": "You are a helpful assistant."},
-#             {"role": "user", "content": user_input},
-#             message,  # The model's tool call
-#             {
-#                 "role": "tool",
-#                 "name": tool_name,
-#                 "content": result,
-#                 "tool_call_id": tool_call_id,  # Include the tool_call_id
-#             },
-#         ],
-#     )
-#     return response
+def send_tool_call_response(LLM, user_input, message, tool_name, result, tool_call_id):
+    response = client.chat.completions.create(
+        model=LLM,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_input},
+            message,  # The model's tool call
+            {
+                "role": "tool",
+                "name": tool_name,
+                "content": result,
+                "tool_call_id": tool_call_id,  # Include the tool_call_id
+            },
+        ],
+    )
+    return response
 
 
 def app():

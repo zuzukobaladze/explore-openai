@@ -12,6 +12,7 @@ python-dotenv = "^1.0.1"
 streamlit = "^1.38.0"
 requests = "^2.32.3"
 pyttsx3 = "^2.91"
+yfinance = "^0.2.43"
 
 
 [build-system]
