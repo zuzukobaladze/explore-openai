@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import requests
 import yfinance as yf
 from dotenv import load_dotenv
-from model.Weather import OpenMeteoInput
+from model.weather_model import OpenMeteoInput
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion, ChatCompletionMessage
 
@@ -70,114 +70,36 @@ def get_current_stock_value(ticker_symbol):
     print(todays_data.to_string(index=False))
     return f"The stock price of {ticker_symbol} is,  {todays_data['Close'].iloc[0]}"
 
+system_message = """You are an intelligent assistant capable of performing a wide variety of tasks using predefined functions. 
+These functions include retrieving real-time data such as weather information, stock prices, and time and more.
+Always choose the appropriate function based on the user’s query. Ensure that responses are clear, accurate, and only invoke functions when required. 
+If the task cannot be completed using the available functions, politely inform the user.
+"""
+
+system_message = """You are a helpful assistant!"""
+
 
 def ask_openai(
-    prompt: str,
+    custom_messages: list,
 ) -> ChatCompletion:
+    messages = [{"role": "system", "content": system_message}]
+    messages.extend(custom_messages)
+    print(f"messages : {messages}")
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": prompt},
-        ],
+        messages=messages,
     )
     return response
 
 
-# Send the result back to the model
-
-
-# def send_tool_call_response(LLM, user_input, message, tool_name, result, tool_call_id):
-#     response = client.chat.completions.create(
-#         model=LLM,
-#         messages=[
-#             {"role": "system", "content": "You are a helpful assistant."},
-#             {"role": "user", "content": user_input},
-#             message,  # The model's tool call
-#             {
-#                 "role": "tool",
-#                 "name": tool_name,
-#                 "content": result,
-#                 "tool_call_id": tool_call_id,  # Include the tool_call_id
-#             },
-#         ],
-#     )
-#     return response
-
-
-def app():
-    while True:
-        user_input = input("You: ")
-        if user_input == "exit":
-            break
-        response = ask_openai(user_input)
-        message: ChatCompletionMessage = response.choices[0].message
-        print(f"response : {message.tool_calls}")
-        if message.tool_calls and len(message.tool_calls) != 0:
-            print(f"response : {message.tool_calls[0].function}")
-            function = message.tool_calls[0].function
-            tool_name = message.tool_calls[0].function.name
-            tool_name = function.name
-            if tool_name == "get_current_weather":
-                # Extract tool name and arguments
-                arguments = json.loads(
-                    function.arguments
-                )  # Parse JSON string to dictionary
-                print(f" get_current_weather arguments : {arguments}")
-                # Execute the tool
-                latitude = arguments.get("latitude")
-                longitude = arguments.get("longitude")
-                open_meteo_input = OpenMeteoInput(
-                    latitude=latitude, longitude=longitude
-                )
-                result = get_current_weather(open_meteo_input)
-                tool_call_id = message.tool_calls[0].id  # Get the tool_call_id
-                # Send the result back to the model
-                second_response = send_tool_call_response(
-                    LLM, user_input, message, tool_name, result, tool_call_id
-                )
-                # Print the model's final response
-                final_message = second_response.choices[0].message.content
-                print(f"Final Assistant: {final_message}")
-            if tool_name == "get_current_stock_value":
-                # Extract tool name and arguments
-                arguments = json.loads(
-                    function.arguments
-                )  # Parse JSON string to dictionary
-                print(f"get_current_stock_value arguments : {arguments}")
-                # Execute the tool
-                symbol = arguments.get("ticker_symbol")
-                result = get_current_stock_value(symbol)
-                tool_call_id = message.tool_calls[0].id  # Get the tool_call_id
-                # Send the result back to the model
-                second_response = send_tool_call_response(
-                    LLM, user_input, message, tool_name, result, tool_call_id
-                )
-                # Print the model's final response
-                final_message = second_response.choices[0].message.content
-                print(f"Final Assistant: {final_message}")
-            elif tool_name == "get_current_time":
-                result = get_current_time()
-                tool_call_id = message.tool_calls[0].id  # Get the tool_call_id
-                second_response = send_tool_call_response(
-                    LLM, user_input, message, tool_name, result, tool_call_id
-                )
-                # Print the model's final response
-                final_message = second_response.choices[0].message.content
-                print(f"Assistant: {final_message}")
-        else:
-            # If no function call, just print the assistant's message
-            print(f"Assistant: {message.content}")
-
-
 if __name__ == "__main__":
-    # Initial prompts
+    # Initial promptsç
     prompt = "Whats the current time?"
     # prompt = "Whats the current weather in new york?"
     # prompt = "Whats the current stock value of Tesla?"
 
-
-    response: ChatCompletion = ask_openai(prompt)
+    user_message = [{"role": "user", "content": prompt}]
+    response: ChatCompletion = ask_openai(user_message)
     print(f"response  : {response.choices[0].message.content}")
 
     # Complete App
