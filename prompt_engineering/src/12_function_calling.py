@@ -175,8 +175,10 @@ if __name__ == "__main__":
     prompt = "Whats the current time?"
     # prompt = "Whats the current weather in new york?"
     # prompt = "Whats the current stock value of Tesla?"
-    # response: ChatCompletion = ask_openai(prompt)
-    # print(f"response  : {response.choices[0].message.content}")
+
+
+    response: ChatCompletion = ask_openai(prompt)
+    print(f"response  : {response.choices[0].message.content}")
 
     # Complete App
-    app()
+    # app()

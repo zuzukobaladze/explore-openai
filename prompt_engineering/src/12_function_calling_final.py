@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import requests
 import yfinance as yf
 from dotenv import load_dotenv
-from model.Weather import OpenMeteoInput
+from model.weather_model import OpenMeteoInput
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion, ChatCompletionMessage
 
