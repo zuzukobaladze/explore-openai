@@ -8,6 +8,7 @@
   - [Popular Build/Dependency Management tools in python](#popular-builddependency-management-tools-in-python)
   - [Poetry](#poetry)
   - [Setup .env file](#setup-env-file)
+  - [ChatBot UI using Streamlit](#chatbot-ui-using-streamlit)
 
 ## Python Installation
 
@@ -42,4 +43,10 @@
 ```
 OPEN_AI_MODEL="gpt-4o"
 OPENAI_API_KEY=
+```
+
+## ChatBot UI using Streamlit 
+
+```
+streamlit run src/app.py
 ```
