@@ -53,12 +53,13 @@ if prompt:
 
     # Streaming
 
-    # st.write_stream(
-    #         chunk.choices[0].delta.content
-    #         for chunk in ask_openai(prompt)
-    #         if chunk.choices and chunk.choices[0].delta.content
-    #     )
-    with st.chat_message("ai"):
-        st.write_stream(response_generator(prompt))
+    # Streaming - Approach 1
+    st.chat_message("ai").write_stream(
+        chunk.choices[0].delta.content
+        for chunk in ask_openai(prompt)
+        if chunk.choices and chunk.choices[0].delta.content
+    )
 
-    # st.write_stream(response_generator(prompt))
+    # Streaming - Approach 2
+    # with st.chat_message("ai"):
+    #     st.write_stream(response_generator(prompt))
