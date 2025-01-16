@@ -16,6 +16,7 @@ def ask_openai(
     temperature: float = 1.0,
     top_p: float = 1.0,
     max_tokens: int = 256,
+    stream=False,
 ) -> ChatCompletion:
     print(f"LLM : {LLM}")
 
@@ -34,7 +35,6 @@ def ask_openai(
         top_p=top_p,
     )
 
-    print(f"response  type : {type(response)}")
     return response
 
 
