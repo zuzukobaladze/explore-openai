@@ -9,7 +9,7 @@ client = OpenAI()
 
 st.header("Chat :blue[Application]")
 
-# chat_history = [AI Message, UserMessage, AIMessage, UserMessage]
+# chat_history = [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
 
 
 def ask_openai(

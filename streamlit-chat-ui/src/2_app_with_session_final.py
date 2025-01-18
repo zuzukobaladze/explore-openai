@@ -14,37 +14,21 @@ USER = "user"
 BOT = "bot"
 
 st.header("Chat :blue[Application]")
-# chat_history = [AI Message, UserMessage, AIMessage, UserMessage]
+# chat_history = [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
 
-# if "chat_history" not in st.session_state:
-#     st.session_state["chat_history"] = [
-#         ChatMessage(content="Hello, how can I help you?", sender=BOT)
-#     ]
+if "chat_history" not in st.session_state:
+    st.session_state["chat_history"] = [
+        ChatMessage(content="Hello, how can I help you?", sender=BOT)
+    ]
 
-# chat_history = st.session_state["chat_history"]
+chat_history = st.session_state["chat_history"]
 
-# for history in chat_history:
-#     if history.sender == BOT:
-#         st.chat_message("ai").write(history.content)
+for history in chat_history:
+    if history.sender == BOT:
+        st.chat_message("ai").write(history.content)
 
-#     if history.sender == USER:
-#         st.chat_message("human").write(history.content)
-
-
-def app_session_init():
-    if "chat_history" not in st.session_state:
-        st.session_state["chat_history"] = [
-            ChatMessage(content="Hello, how can I help you?", sender=BOT)
-        ]
-
-    chat_history = st.session_state["chat_history"]
-
-    for history in chat_history:
-        if history.sender == BOT:
-            st.chat_message("ai").write(history.content)
-
-        if history.sender == USER:
-            st.chat_message("human").write(history.content)
+    if history.sender == USER:
+        st.chat_message("human").write(history.content)
 
 
 LLM = "gpt-4o"
@@ -78,7 +62,6 @@ def response_generator(user_question):
 
 
 def run():
-    app_session_init()
     prompt = st.chat_input("Add your prompt...")
 
     if prompt:

@@ -1,5 +1,3 @@
-import uuid
-
 import streamlit as st
 from openai import OpenAI
 
@@ -15,54 +13,44 @@ class ChatMessage(BaseModel):
 USER = "user"
 BOT = "bot"
 
-if "current_chat" not in st.session_state:
-    st.session_state.current_chat = []  # Current chat history
+# chat_history - Holds all the chats of the user
+# [
+# {
+#     "id": "uuid",
+#     "name": "Chat 1",
+#     "messages": [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
+# },
+# {
+#     "id": "uuid",
+#     "name": "Chat 1",
+#     "messages": [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
+# }
+# ]
+
+# active_chat_id = uuid.uuid4()
+# current_chat = [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
+
+
+st.header("Chat :blue[Application]")
 
 
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []  # List of all chats
+    st.session_state["chat_history"] = [
+        ChatMessage(content="Hello, how can I help you?", sender=BOT)
+    ]
 
-if "active_chat_id" not in st.session_state:
-    st.session_state.active_chat_id = None  # Active chat ID
+chat_history = st.session_state["chat_history"]
+
+for history in chat_history:
+    if history.sender == BOT:
+        st.chat_message("ai").write(history.content)
+
+    if history.sender == USER:
+        st.chat_message("human").write(history.content)
+
 
 LLM = "gpt-4o"
 client = OpenAI()
-
-with st.sidebar:
-    st.title("Chats Conversations")
-    if st.button("New Chat"):
-        # Start a new chat
-        st.session_state.active_chat_id = str(uuid.uuid4())  # Generate a new unique ID
-        st.session_state.current_chat = []  # Clear current chat
-        st.session_state.chat_history.append(
-            {
-                "id": st.session_state.active_chat_id,  # Save the current active chat ID
-                "name": f"Chat {len(st.session_state.chat_history) + 1}",
-                "messages": st.session_state.current_chat,
-            }
-        )
-
-    for chat in st.session_state.chat_history:
-        print("Chat: ", chat)
-        if chat["name"]:
-            # This the code places the button in the sidebar
-            if st.button(chat["name"]):
-                print("Chat ID: ", chat["id"])
-                # Load a saved chat into current chat
-                st.session_state.active_chat_id = chat["id"]
-                st.session_state.current_chat = chat["messages"]
-
-
-def display_current_chat():
-    """Display all chat messages in the current chat."""
-    for message in st.session_state.current_chat:
-        # print("Message in display_current_chat: ", message)
-        if message.content:
-            if message.sender == BOT:
-                st.chat_message("ai").write(message.content)
-
-            if message.sender == USER:
-                st.chat_message("human").write(message.content)
 
 
 def ask_openai(
@@ -92,29 +80,19 @@ def response_generator(user_question):
 
 
 def run():
-    # st.set_page_config(page_title="Chat Application")
-    st.header("Chat :blue[Application]")
-    # st.selectbox("Select LLM:", get_models(), key="selected_model")
+    prompt = st.chat_input("Add your prompt...")
 
-    # app_session_init()
-    display_current_chat()
+    if prompt:
+        st.chat_message("user").write(prompt)
+        st.session_state["chat_history"] += [ChatMessage(content=prompt, sender=USER)]
+        output = response_generator(prompt)
 
-    if st.session_state.chat_history:
-        prompt = st.chat_input("Add your prompt...")
+        with st.chat_message("ai"):
+            ai_message = st.write_stream(output)
 
-        if prompt:
-            st.chat_message("user").write(prompt)
-            output = response_generator(prompt)
-            st.session_state.current_chat.append(
-                ChatMessage(content=prompt, sender=USER)
-            )
-
-            with st.chat_message("ai"):
-                ai_message = st.write_stream(output)
-
-            st.session_state.current_chat.append(
-                ChatMessage(content=ai_message, sender=BOT)
-            )
+        st.session_state["chat_history"] += [
+            ChatMessage(content=ai_message, sender=BOT)
+        ]
 
 
 if __name__ == "__main__":
