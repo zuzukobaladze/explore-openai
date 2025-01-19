@@ -41,7 +41,7 @@ def save_chat(chat_id, chat_name):
     print("Saved the chat!")
 
 
-def save_messages(chat_id, messages):
+def save_messages(chat_id, messages: list[ChatMessage]):
     conn = sqlite3.connect("chat_history.db")
     cursor = conn.cursor()
     # Save chat messages

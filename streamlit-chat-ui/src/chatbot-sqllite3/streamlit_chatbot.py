@@ -1,10 +1,11 @@
 import uuid
 
 import streamlit as st
+from db_utils import init_db, load_chats_from_db, save_chat_to_db
 from openai import OpenAI
-
-# from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel
+
+init_db()
 
 
 class ChatMessage(BaseModel):
@@ -15,33 +16,13 @@ class ChatMessage(BaseModel):
 USER = "user"
 BOT = "bot"
 
-
-# chat_history - Holds all the chats of the application
-# [
-# {
-#     "id": "uuid",
-#     "name": "Chat 1",
-#     "messages": [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
-# },
-# {
-#     "id": "uuid",
-#     "name": "Chat 1",
-#     "messages": [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
-# }
-# ]
-
-# active_chat_id = uuid.uuid4()
-# current_chat = [ChatMessage[bot], ChatMessage[user], ChatMessage[bot], ChatMessage[user]]
-
-
 st.header("Chat :blue[Application]")
 
 if "current_chat" not in st.session_state:
     st.session_state.current_chat = []  # Current chat history
 
-
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []  # List of all chats
+    st.session_state.chat_history = load_chats_from_db()  # Load from DB
 
 if "active_chat_id" not in st.session_state:
     st.session_state.active_chat_id = None  # Active chat ID
@@ -55,22 +36,18 @@ with st.sidebar:
         # Start a new chat
         st.session_state.active_chat_id = str(uuid.uuid4())  # Generate a new unique ID
         st.session_state.current_chat = []  # Clear current chat
-        st.session_state.chat_history.append(
-            {
-                "id": st.session_state.active_chat_id,  # Save the current active chat ID
-                "name": f"Chat {len(st.session_state.chat_history) + 1}",
-                "messages": st.session_state.current_chat,
-            }
-        )
+        new_chat = {
+            "id": st.session_state.active_chat_id,  # Save the current active chat ID
+            "name": f"Chat {len(st.session_state.chat_history) + 1}",
+            "messages": st.session_state.current_chat,
+        }
+        st.session_state.chat_history.append(new_chat)
+        save_chat_to_db(new_chat["id"], new_chat["name"], new_chat["messages"])
 
     # To Display the chats in the sidebar
     for chat in st.session_state.chat_history:
-        print("Chat: ", chat)
         if chat["name"]:
-            # This the code places the button in the sidebar
             if st.button(chat["name"]):
-                print("Chat ID: ", chat["id"])
-                # Load a saved chat into current chat
                 st.session_state.active_chat_id = chat["id"]
                 st.session_state.current_chat = chat["messages"]
 
@@ -78,7 +55,6 @@ with st.sidebar:
 def display_current_chat():
     """Display all chat messages in the current chat."""
     for message in st.session_state.current_chat:
-        # print("Message in display_current_chat: ", message)
         if message.content:
             if message.sender == BOT:
                 st.chat_message("ai").write(message.content)
@@ -103,7 +79,6 @@ def ask_openai(
         top_p=top_p,
         stream=True,
     )
-
     return response
 
 
@@ -116,7 +91,7 @@ def response_generator(user_question):
 def run():
     display_current_chat()
 
-    if st.session_state.chat_history:
+    if st.session_state.chat_history and st.session_state.active_chat_id:
         prompt = st.chat_input("Add your prompt...")
 
         if prompt:
@@ -127,11 +102,18 @@ def run():
             )
 
             with st.chat_message("ai"):
-                ai_message = st.write_stream(output)
+                ai_message = "".join(output)
+                st.write(ai_message)
 
             st.session_state.current_chat.append(
                 ChatMessage(content=ai_message, sender=BOT)
             )
+
+            # Update the database with the latest chat
+            for chat in st.session_state.chat_history:
+                if chat["id"] == st.session_state.active_chat_id:
+                    chat["messages"] = st.session_state.current_chat
+                    save_chat_to_db(chat["id"], chat["name"], chat["messages"])
 
 
 if __name__ == "__main__":
