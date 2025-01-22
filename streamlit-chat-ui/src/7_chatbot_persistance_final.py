@@ -216,3 +216,8 @@ def run():
 # Entry point for the application
 if __name__ == "__main__":
     run()  # Start the application
+
+# ChatGPT Link
+
+# Persistance : https://chatgpt.com/share/6790dd84-dc70-8010-bb4e-6432421fe118
+# Display the chat input only if there is an active_chat_id : https://chatgpt.com/share/6790dd84-dc70-8010-bb4e-6432421fe118
