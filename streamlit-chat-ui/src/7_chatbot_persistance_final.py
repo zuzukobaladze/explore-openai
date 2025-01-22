@@ -186,30 +186,31 @@ def response_generator(user_question):
 def run():
     """Main function to handle user interaction and chat flow."""
     display_current_chat()  # Show the current chat messages
-    prompt = st.chat_input("Add your prompt...")  # Input for user messages
-    if prompt:
-        st.chat_message("user").write(prompt)  # Display the user input
-        output = response_generator(prompt)  # Get the AI response incrementally
-        st.session_state.current_chat.append(
-            ChatMessage(content=prompt, sender=USER)
-        )  # Save user message
-        save_message_to_db(
-            st.session_state.active_chat_id, USER, prompt
-        )  # Persist user message
-        with st.chat_message("ai"):
-            ai_message = st.write_stream(output)  # Stream and display AI response
-        st.session_state.current_chat.append(
-            ChatMessage(content=ai_message, sender=BOT)
-        )  # Save AI response
-        save_message_to_db(
-            st.session_state.active_chat_id, BOT, ai_message
-        )  # Persist AI response
-        for chat in st.session_state.chat_history:
-            if chat["id"] == st.session_state.active_chat_id:
-                chat["last_message"] = prompt  # Update last message for the chat
-                save_chat_to_db(
-                    chat["id"], chat["name"], prompt
-                )  # Persist updated chat metadata
+    if st.session_state.active_chat_id:
+        prompt = st.chat_input("Add your prompt...")  # Input for user messages
+        if prompt:
+            st.chat_message("user").write(prompt)  # Display the user input
+            output = response_generator(prompt)  # Get the AI response incrementally
+            st.session_state.current_chat.append(
+                ChatMessage(content=prompt, sender=USER)
+            )  # Save user message
+            save_message_to_db(
+                st.session_state.active_chat_id, USER, prompt
+            )  # Persist user message
+            with st.chat_message("ai"):
+                ai_message = st.write_stream(output)  # Stream and display AI response
+            st.session_state.current_chat.append(
+                ChatMessage(content=ai_message, sender=BOT)
+            )  # Save AI response
+            save_message_to_db(
+                st.session_state.active_chat_id, BOT, ai_message
+            )  # Persist AI response
+            for chat in st.session_state.chat_history:
+                if chat["id"] == st.session_state.active_chat_id:
+                    chat["last_message"] = prompt  # Update last message for the chat
+                    save_chat_to_db(
+                        chat["id"], chat["name"], prompt
+                    )  # Persist updated chat metadata
 
 
 # Entry point for the application

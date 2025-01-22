@@ -84,3 +84,5 @@ def main():
 # Entry point for the application
 if __name__ == "__main__":
     main()
+    # Chatgpt Link
+    # https://chatgpt.com/share/678faa51-a088-8010-87b7-0e227b06c923
