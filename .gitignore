@@ -21,3 +21,9 @@ env/
 *.png
 Taylor_Swift_Delicate.mp3
 .env
+chat_history.db
+chatbot.db
+uploaded_images/*.*
+uploaded_images/
+todo.db
+*.db

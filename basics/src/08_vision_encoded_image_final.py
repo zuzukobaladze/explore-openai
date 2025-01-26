@@ -73,6 +73,7 @@ if __name__ == "__main__":
     response_dict = json.loads(response_json)
 
     content = response_dict["choices"][0]["message"]["content"]
+    print("content " + content)
     clean_content_dict = json.loads(content)
     clean_content_json = json.dumps(clean_content_dict, indent=4)
     print(clean_content_json)

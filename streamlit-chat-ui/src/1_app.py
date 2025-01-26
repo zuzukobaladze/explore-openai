@@ -18,13 +18,6 @@ def ask_openai(
     max_tokens: int = 256,
     stream=False,
 ) -> ChatCompletion:
-    print(f"LLM : {LLM}")
-
-    system_message = """
-        You are a helpful assistant that answers questions about Python programming!
-        If the user asks any other questions then you can respond with I don't know in a funny way!
-    """
-
     response = client.chat.completions.create(
         model=LLM,
         messages=[
@@ -33,15 +26,7 @@ def ask_openai(
         temperature=temperature,
         max_tokens=max_tokens,
         top_p=top_p,
+        stream=stream,
     )
 
     return response
-
-
-if __name__ == "__main__":
-    user_question = "Hello"
-    response: ChatCompletion = ask_openai(user_question)
-
-    # Pretty print the entire response
-    response = response.choices[0].message.content
-    print(f"response : {response}")
