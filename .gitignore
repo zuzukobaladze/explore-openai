@@ -26,3 +26,4 @@ chatbot.db
 uploaded_images/*.*
 uploaded_images/
 todo.db
+*.db
