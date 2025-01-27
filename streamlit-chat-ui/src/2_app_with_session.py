@@ -1,7 +1,7 @@
 import streamlit as st
 from openai import OpenAI
-
-# from langchain_core.messages import AIMessage, HumanMessage
+from dotenv import load_dotenv
+load_dotenv()
 
 
 LLM = "gpt-4o"

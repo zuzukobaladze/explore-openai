@@ -6,6 +6,8 @@ from openai import OpenAI
 
 # from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel
+from dotenv import load_dotenv
+load_dotenv()
 
 
 # Define the structure of a chat message

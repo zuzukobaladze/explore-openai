@@ -1,4 +1,6 @@
 # Python program to perform the sum of two numbers
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def sum_of_two_numbers(a, b):

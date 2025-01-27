@@ -4,6 +4,8 @@ import streamlit as st
 from db.chat_db import init_db, load_chats, load_messages, save_chat, save_messages
 from model.chats_models import ChatMessage
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv()
 
 # from langchain_core.messages import AIMessage, HumanMessage
 

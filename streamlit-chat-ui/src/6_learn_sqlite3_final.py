@@ -1,4 +1,6 @@
 import sqlite3
+from dotenv import load_dotenv
+load_dotenv()
 
 
 # Function to create the tasks table if it doesn't already exist

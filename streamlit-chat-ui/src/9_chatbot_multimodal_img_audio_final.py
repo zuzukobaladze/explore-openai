@@ -11,7 +11,8 @@ import requests
 import streamlit as st
 from openai import OpenAI
 from pydantic import BaseModel
-
+from dotenv import load_dotenv
+load_dotenv()
 # Configure basic logging to debug issues or track general flow
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
