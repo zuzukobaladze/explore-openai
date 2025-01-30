@@ -34,7 +34,7 @@ def ask_openai(
 
 
 def response_generator(user_question):
-    for chunk in ask_openai(user_question):
+    for chunk in ask_openai(user_question=user_question, stream=True):
         if chunk.choices and chunk.choices[0].delta.content:
             yield chunk.choices[0].delta.content  # Stream response incrementally
 
@@ -50,18 +50,18 @@ def run():
         st.chat_message("human").write(prompt)
 
         # non -streaming
-        response: ChatCompletion = ask_openai(prompt)
-        llm_output = response.choices[0].message.content
-        st.chat_message("ai").write(llm_output)
+        # response: ChatCompletion = ask_openai(prompt)
+        # llm_output = response.choices[0].message.content
+        # st.chat_message("ai").write(llm_output)
 
         # Streaming
 
         # Streaming - Approach 1
-        # st.chat_message("ai").write_stream(
-        #     chunk.choices[0].delta.content
-        #     for chunk in ask_openai(prompt)
-        #     if chunk.choices and chunk.choices[0].delta.content
-        # )
+        st.chat_message("ai").write_stream(
+            chunk.choices[0].delta.content
+            for chunk in ask_openai(user_question=prompt, stream=True)
+            if chunk.choices and chunk.choices[0].delta.content
+        )
 
         # Streaming - Approach 2
         # with st.chat_message("ai"):
