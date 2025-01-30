@@ -1,3 +1,4 @@
+import uuid
 import streamlit as st
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -18,22 +19,27 @@ client = OpenAI()
 with st.sidebar:
     st.title("Conversations")
 
+    # Ensure session state is ready
     if "conversations" not in st.session_state:
         st.session_state["conversations"] = {}
 
     # Create a new conversation (on top)
-    if st.button("New Chat"):
-        new_key = f"Conversation {len(st.session_state['conversations']) + 1}"
-        st.session_state["conversations"][new_key] = [
-            ChatMessage(sender=BOT, content="Hello, how can I help you ?")
-        ]
-        st.session_state["selected_conversation"] = new_key
+    if st.button("New Chat", key="new_chat_button"):
+        new_id = str(uuid.uuid4())
+        st.session_state["conversations"][new_id] = {
+            "messages": [
+                ChatMessage(sender=BOT, content="Hello, how can I help you ?")
+            ],
+            "display_name": "New Chat"
+        }
+        st.session_state["selected_conversation"] = new_id
 
     # Display existing conversations
-    for conversation_key in st.session_state["conversations"]:
-        if st.button(conversation_key):
+    for conversation_key, convo_data in st.session_state["conversations"].items():
+        if st.button(convo_data["display_name"], key=conversation_key):
             st.session_state["selected_conversation"] = conversation_key
 
+print(f"conversations : { st.session_state["conversations"]}")
 st.header("Chat :blue[Application]")
 
 def ask_openai(
@@ -65,7 +71,8 @@ def run():
     # Only show chat if a conversation is selected
     if "selected_conversation" in st.session_state:
         convo_key = st.session_state["selected_conversation"]
-        chat_history = st.session_state["conversations"][convo_key]
+        convo_data = st.session_state["conversations"][convo_key]
+        chat_history = convo_data["messages"]
 
         # Display chat history
         for history in chat_history:
@@ -88,18 +95,12 @@ def run():
 
             chat_history.append(ChatMessage(content=ai_message, sender=BOT))
 
-            # Rename conversation to last user prompt in the sidebar
-            # if user typed a prompt. This ensures the conversation
-            # name is always the most recent user prompt
-            if prompt != convo_key:  # only rename if prompt is different
-                # Move the conversation data under the new key
-                st.session_state["conversations"][prompt] = st.session_state["conversations"].pop(convo_key)
-                # Update selected conversation key
-                st.session_state["selected_conversation"] = prompt
-                convo_key = prompt
+            # Update display name to the last user prompt
+            convo_data["display_name"] = prompt
 
-            # Update the conversation in session state
-            st.session_state["conversations"][convo_key] = chat_history
+            # Update session state with the new messages and display name
+            st.session_state["conversations"][convo_key] = convo_data
+
     else:
         st.write("Please select or start a new chat from the sidebar.")
 
