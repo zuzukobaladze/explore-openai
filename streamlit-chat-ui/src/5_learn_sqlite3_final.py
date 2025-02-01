@@ -1,90 +1,202 @@
+"""
+A simple interactive command-line to-do application using SQLite.
+
+This version is always running and waits for user input, providing a numbered menu:
+    1) Add Task
+    2) Remove Task
+    3) List Tasks
+    4) Edit Task
+    5) Mark Task Done
+    6) Exit
+
+It uses the functions defined below for each operation.
+"""
+
 import sqlite3
-from dotenv import load_dotenv
-load_dotenv()
+
+# The name of the SQLite database file where tasks are stored.
+DB_NAME = "todos.db"
 
 
-# Function to create the tasks table if it doesn't already exist
-def create_table():
-    conn = sqlite3.connect("todo.db")
+def init_db():
+    """Create the tasks table if it does not exist."""
+    # Connect to the SQLite database.
+    # If the file doesn't exist, it will be created.
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS tasks (
-                        id INTEGER PRIMARY KEY,
-                        task TEXT,
-                        status TEXT)""")
+
+    # Create 'tasks' table if it doesn't already exist.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            done INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Commit changes and close the connection.
     conn.commit()
     conn.close()
 
 
-# Function to add a new task to the database
-def add_task(task):
-    conn = sqlite3.connect("todo.db")
+def add_task(title):
+    """Add a new task to the database."""
+    # Connect to the database.
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO tasks (task, status) VALUES (?, ?)", (task, "pending"))
+
+    # Insert a new record with the specified title.
+    cursor.execute("INSERT INTO tasks (title) VALUES (?)", (title,))
+
+    # Commit the transaction and close.
     conn.commit()
     conn.close()
+    print(f"Task added: '{title}'")
 
 
-# Function to retrieve all tasks from the database
 def list_tasks():
-    conn = sqlite3.connect("todo.db")
+    """List all tasks."""
+    # Connect to the database.
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks")
+
+    # Select all fields from the 'tasks' table.
+    cursor.execute("SELECT id, title, done, created_at FROM tasks")
     rows = cursor.fetchall()
     conn.close()
-    return rows
+
+    # If no rows, then there are no tasks.
+    if not rows:
+        print("No tasks found.")
+        return
+
+    # Print a header.
+    print("\n--- To-Do List ---")
+
+    # Iterate over each task row.
+    for row in rows:
+        task_id, title, done, created_at = row
+        # Determine status based on the 'done' flag.
+        status = "[X]" if done else "[ ]"
+        # Display task details.
+        print(f"{task_id}. {status} {title} (Created: {created_at})")
 
 
-# Function to mark a task as completed based on its ID
-def complete_task(task_id):
-    conn = sqlite3.connect("todo.db")
+def edit_task(task_id, new_title):
+    """Edit the title of an existing task."""
+    # Connect to the database.
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("UPDATE tasks SET status = ? WHERE id = ?", ("completed", task_id))
+
+    # Update the 'title' field for the given 'task_id'.
+    cursor.execute("UPDATE tasks SET title = ? WHERE id = ?", (new_title, task_id))
     conn.commit()
+
+    # 'cursor.rowcount' gives the number of rows affected by the last execute.
+    updated_rows = cursor.rowcount
     conn.close()
 
+    # If at least one row was updated, display success; otherwise, show error.
+    if updated_rows > 0:
+        print(f"Task {task_id} updated to '{new_title}'")
+    else:
+        print(f"Task with ID {task_id} not found.")
 
-# Main function to run the command-line to-do list app
+
+def mark_done(task_id):
+    """Mark a task as completed."""
+    # Connect to the database.
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Set 'done' to 1 for the specified task.
+    cursor.execute("UPDATE tasks SET done = 1 WHERE id = ?", (task_id,))
+    conn.commit()
+
+    updated_rows = cursor.rowcount
+    conn.close()
+
+    if updated_rows > 0:
+        print(f"Task {task_id} marked as done.")
+    else:
+        print(f"Task with ID {task_id} not found.")
+
+
+def delete_task(task_id):
+    """Delete a task by its ID."""
+    # Connect to the database.
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Delete the record with the matching 'id'.
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+
+    deleted_rows = cursor.rowcount
+    conn.close()
+
+    if deleted_rows > 0:
+        print(f"Task {task_id} deleted.")
+    else:
+        print(f"Task with ID {task_id} not found.")
+
+
 def main():
-    create_table()  # Ensure the table exists
+    # Initialize (create) the database and table.
+    init_db()
 
+    # Enter a loop to continuously prompt the user.
     while True:
-        # Display the main menu
-        print("\nTo-Do List App")
-        print("1. Add Task")
-        print("2. List Tasks")
-        print("3. Complete Task")
-        print("4. Exit")
+        print("\nSelect an option:")
+        print("1) Add Task")
+        print("2) Remove Task")
+        print("3) List Tasks")
+        print("4) Edit Task")
+        print("5) Mark Task Done")
+        print("6) Exit")
 
-        # Prompt the user for a choice
-        choice = input("Enter your choice: ")
+        # Capture user input.
+        choice = input("Enter your choice: ").strip()
 
-        if choice == "1":
-            # Add a new task
-            task = input("Enter the task: ")
-            add_task(task)
-            print("Task added successfully!")
-        elif choice == "2":
-            # List all tasks
-            tasks = list_tasks()
-            print("\nTasks:")
-            for task in tasks:
-                print(f"ID: {task[0]}, Task: {task[1]}, Status: {task[2]}")
-        elif choice == "3":
-            # Mark a task as completed
-            task_id = input("Enter the task ID to mark as completed: ")
-            complete_task(int(task_id))
-            print("Task marked as completed!")
-        elif choice == "4":
-            # Exit the app
-            print("Exiting the app. Goodbye!")
+        # Check which option was chosen.
+        if choice == '1':
+            # Add a new task.
+            title = input("Enter the task title: ").strip()
+            add_task(title)
+        elif choice == '2':
+            # Remove an existing task.
+            task_id = input("Enter the task ID to remove: ").strip()
+            if task_id.isdigit():
+                delete_task(int(task_id))
+            else:
+                print("Invalid task ID.")
+        elif choice == '3':
+            # List all tasks.
+            list_tasks()
+        elif choice == '4':
+            # Edit an existing task.
+            task_id = input("Enter the task ID to edit: ").strip()
+            if task_id.isdigit():
+                new_title = input("Enter the new title: ").strip()
+                edit_task(int(task_id), new_title)
+            else:
+                print("Invalid task ID.")
+        elif choice == '5':
+            # Mark a task as done.
+            task_id = input("Enter the task ID to mark as done: ").strip()
+            if task_id.isdigit():
+                mark_done(int(task_id))
+            else:
+                print("Invalid task ID.")
+        elif choice == '6':
+            # Exit the application.
+            print("Exiting...")
             break
         else:
-            # Handle invalid input
+            # Invalid menu choice.
             print("Invalid choice. Please try again.")
 
-
-# Entry point for the application
+# If this file is executed directly, run 'main()'.
 if __name__ == "__main__":
     main()
-    # Chatgpt Link
-    # https://chatgpt.com/share/678faa51-a088-8010-87b7-0e227b06c923
