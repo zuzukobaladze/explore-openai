@@ -12,11 +12,47 @@ Prompt 2: |
 ==========
 
 I want to make the chatbot multimodal. I want to upload the images and ask the llm to describe it
-I want the user to submit a form the UI that has the ability to upload the image and the prompt. 
-If only prompt is given in the form then invoke the ask_openai function and stream the response as it is today and show it.
-If both the prompt and image are passed then call the "ask_openai_image" function.
+1 - I want the user to submit a form the UI that has the ability to upload the image and the prompt. 
+2 - If only prompt is given in the form then invoke the ask_openai function and stream the response as it is today and show it.
+  - Also make sure to use client.chat.completions.create() for LLM calls and do not use this api openai.ChatCompletion.create.
+
+```
+# Generate response by calling OpenAI.
+output = response_generator(prompt)
+with st.chat_message("ai"):
+    ai_message = st.write_stream(output)
+
+def ask_openai(
+    user_question: str,
+    temperature: float = 1.0,
+    top_p: float = 1.0,
+    max_tokens: int = 256,
+):
+    """Send a user question to OpenAI and stream the completion response."""
+    response = client.chat.completions.create(
+        model=LLM,
+        messages=[
+            {"role": "user", "content": user_question},
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p,
+        stream=True,
+    )
+    return response
+```
+
+3 - If both the prompt and image are passed then call the "ask_openai_image" function.
 Please make sure to display the image in the chat conversation window.
-If this involves saving the image in the DB then please save it.
+If this involves saving the image in the DB then please save it in a separate column in the db. 
+I want to have the image being displayed in the convesation window once the user submits the form. 
+Please ensure this code generated is not going to give us this warning.
+
+```
+The use_column_width parameter has been deprecated and will be removed in a future release. Please utilize the use_container_width parameter instead.
+
+```
+
 
 ```
 api_key = os.environ.get("OPENAI_API_KEY")
@@ -69,20 +105,26 @@ def ask_openai_image(
 Prompt 3: |
 ==========
 
-It looks you are not using the st.write_stream if only prompt is given. Can you check and fix it ?
+After submitting the form, please do the following:
 
-```
-# Generate response by calling OpenAI.
-output = response_generator(prompt)
-with st.chat_message("ai"):
-    ai_message = st.write_stream(output)
-```    
+1 - Provide a spinner for image uploads until we recieve the response from the Open AI call.
+2 - User input Prompt still stays in the input box even after the response is recieved from the AI.
+ Please clear the prompt from the prompt input box once the form is submited.
+ Ensure we are not running into this issue.
+
+ ```
+ streamlit.errors.StreamlitAPIException: st.session_state.user_prompt cannot be modified after the widget with key user_prompt is instantiated.
+
+ ```
 
 ==========
 Prompt 4: |
 ==========
 
-I got this error when the image is pulled from the db and attempted to display in the UI.
+I want the form to be always at the bottom of the screen. 
+Please ensure that the form stays at the bottom in these scenarions.
+1 - When the user submits the prompt, the current prompt and the live response that's been rendered from the ai should be at the top of the form.
+2 - All the previous conversations in the current chat should also be in the top of the form.
 
 ```
 streamlit.runtime.media_file_storage.MediaFileStorageError: 

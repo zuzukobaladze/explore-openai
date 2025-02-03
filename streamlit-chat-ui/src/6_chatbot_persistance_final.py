@@ -214,3 +214,6 @@ if st.session_state["selected_chat"]:
         run()
 else:
     st.write("Select or create a new chat from the sidebar to begin.")
+
+# chatgpt - link
+# https://chatgpt.com/share/679f8b39-facc-8010-9357-566deeae424e
