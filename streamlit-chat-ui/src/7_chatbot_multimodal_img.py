@@ -245,7 +245,22 @@ with st.sidebar:
         if st.button(button_label, key=f"chat_button_{chat_id}"):
             st.session_state["selected_chat"] = chat_id
 
-print(f"conversations : {st.session_state['all_chats']}")
+# print(f"conversations : {st.session_state['all_chats']}")
+
+def display_chat_history(chat_history):
+        for msg in chat_history:
+            if msg.sender == BOT:
+                with st.chat_message("ai"):
+                    st.write(msg.content)
+            else:
+                with st.chat_message("human"):
+                    if msg.content:
+                        st.write(msg.content)
+                    if msg.image:
+                                # Display the image in conversation
+                        st.image(
+                                    base64.b64decode(msg.image), use_container_width=True
+                                )
 
 # If a chat is selected, display its conversation and the chat input
 if st.session_state["selected_chat"]:
@@ -271,6 +286,7 @@ if st.session_state["selected_chat"]:
         print(f"submit_button: {submit_button}")
         with chat_container:
             if submit_button:
+                display_chat_history(chat_history=chat_history)
                 # Show spinner
                 if uploaded_img is not None:
                     # If there's an image, specifically mention it
@@ -343,19 +359,9 @@ if st.session_state["selected_chat"]:
                         st.warning("Please enter a prompt or upload an image.")
             else:
                 # Display chat history
-                for msg in chat_history:
-                    if msg.sender == BOT:
-                        with st.chat_message("ai"):
-                            st.write(msg.content)
-                    else:
-                        with st.chat_message("human"):
-                            if msg.content:
-                                st.write(msg.content)
-                            if msg.image:
-                                # Display the image in conversation
-                                st.image(
-                                    base64.b64decode(msg.image), use_column_width=True
-                                )
+                display_chat_history(chat_history=chat_history)
+
+
 
     if __name__ == "__main__":
         run()
