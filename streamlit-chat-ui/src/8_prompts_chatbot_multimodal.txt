@@ -2,7 +2,8 @@
 Prompt 1: |
 ==========
 
-I am going to give you a streamlit chatbot code. Please load it into the editor, dont modify it.
+I am going to give you a streamlit chatbot code. Please load the whole code into the editor, dont modify it.
+I am going to give you a streamlit chatbot code. 
 
 ```
 <paste your code here>
