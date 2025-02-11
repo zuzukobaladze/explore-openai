@@ -13,6 +13,8 @@ api_key = os.environ.get("OPENAI_API_KEY")
 image_path = "src/resources/invoice-template.png"
 
 # Call the openai chat.completions endpoint
+api_key = os.environ.get("OPENAI_API_KEY")
+
 def ask_openai(
     user_question: str,
     temperature: float = 1.0,

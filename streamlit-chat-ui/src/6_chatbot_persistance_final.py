@@ -2,224 +2,218 @@ import sqlite3
 import uuid
 
 import streamlit as st
-from openai import OpenAI
-
-# from langchain_core.messages import AIMessage, HumanMessage
-from pydantic import BaseModel
 from dotenv import load_dotenv
+from openai import OpenAI
+from pydantic import BaseModel
+
 load_dotenv()
 
 
-# Define the structure of a chat message
 class ChatMessage(BaseModel):
-    sender: str  # Indicates the sender of the message, either "user" or "bot"
-    content: str  # The actual content of the message
+    sender: str  # BOT, USER
+    content: str
 
 
-# Constants to represent the sender types
-USER = "user"  # Represents messages from the user
-BOT = "bot"  # Represents messages from the bot
+USER = "user"
+BOT = "bot"
 
-# Set up the header for the Streamlit app
-st.header("Chat :blue[Application]")  # Display application title with styling
+LLM = "gpt-4o"
+client = OpenAI()
 
-# Initialize SQLite database
-DB_PATH = "chat_history.db"  # Path to the SQLite database file
+# -------------------------------------------------
+# Database Persistence Layer
+# -------------------------------------------------
 
 
 def init_db():
-    """Initialize the SQLite database and create required tables."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS chats (
-                        id TEXT PRIMARY KEY,
-                        name TEXT,
-                        last_message TEXT
-                    )""")  # Create table to store chat metadata
-    cursor.execute("""CREATE TABLE IF NOT EXISTS messages (
-                        chat_id TEXT,
-                        sender TEXT,
-                        content TEXT,
-                        FOREIGN KEY(chat_id) REFERENCES chats(id)
-                    )""")  # Create table to store individual messages
-    conn.commit()
-    conn.close()
+    """Initialize the SQLite database and create tables if they don't exist."""
+    with sqlite3.connect("chat.db") as conn:
+        c = conn.cursor()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS chats (
+                chat_id TEXT PRIMARY KEY,
+                name TEXT
+            )
+        """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                message_id TEXT PRIMARY KEY,
+                chat_id TEXT,
+                sender TEXT,
+                content TEXT
+            )
+        """)
+        conn.commit()
 
 
-# Initialize the database
+def load_chats_from_db():
+    """Load all chats and their messages from the DB into a dictionary."""
+    with sqlite3.connect("chat.db") as conn:
+        c = conn.cursor()
+        c.execute("SELECT chat_id, name FROM chats")
+        rows = c.fetchall()
+        all_chats = {}
+        for chat_id, name in rows:
+            c.execute(
+                "SELECT sender, content FROM messages WHERE chat_id=?", (chat_id,)
+            )
+            message_rows = c.fetchall()
+            messages = [
+                ChatMessage(sender=sender, content=content)
+                for sender, content in message_rows
+            ]
+            all_chats[chat_id] = {"name": name, "messages": messages}
+        return all_chats
+
+
+def create_new_chat_in_db(chat_id: str, name: str, first_message: ChatMessage):
+    """Create a new chat row in the DB and insert the first message."""
+    with sqlite3.connect("chat.db") as conn:
+        c = conn.cursor()
+        c.execute("INSERT INTO chats (chat_id, name) VALUES (?,?)", (chat_id, name))
+        c.execute(
+            "INSERT INTO messages (message_id, chat_id, sender, content) VALUES (?,?,?,?)",
+            (str(uuid.uuid4()), chat_id, first_message.sender, first_message.content),
+        )
+        conn.commit()
+
+
+def add_message_to_db(chat_id: str, message: ChatMessage):
+    """Add a new message to the messages table for the given chat."""
+    with sqlite3.connect("chat.db") as conn:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO messages (message_id, chat_id, sender, content) VALUES (?,?,?,?)",
+            (str(uuid.uuid4()), chat_id, message.sender, message.content),
+        )
+        conn.commit()
+
+
+def update_chat_name_in_db(chat_id: str, new_name: str):
+    """Update an existing chat's name."""
+    with sqlite3.connect("chat.db") as conn:
+        c = conn.cursor()
+        c.execute("UPDATE chats SET name=? WHERE chat_id=?", (new_name, chat_id))
+        conn.commit()
+
+
+def get_all_messages():
+    """Retrieve all messages from the DB (for demonstration purposes)."""
+    with sqlite3.connect("chat.db") as conn:
+        c = conn.cursor()
+        c.execute("SELECT chat_id, sender, content FROM messages")
+        return c.fetchall()
+
+
+# -------------------------------------------------
+# Streamlit Chat App
+# -------------------------------------------------
+
+st.header("Chat :blue[Application]")
+
+# Initialize the DB
 init_db()
 
+# Load existing chats from the database
+if "all_chats" not in st.session_state:
+    st.session_state["all_chats"] = load_chats_from_db()
 
-# Helper functions for database operations
-def save_chat_to_db(chat_id, name, last_message):
-    """Save or update a chat session in the database."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT OR REPLACE INTO chats (id, name, last_message) VALUES (?, ?, ?)",
-        (chat_id, name, last_message),
-    )
-    conn.commit()
-    conn.close()
+# Track which chat (by UUID) is currently selected
+if "selected_chat" not in st.session_state:
+    st.session_state["selected_chat"] = None
 
-
-def save_message_to_db(chat_id, sender, content):
-    """Save an individual message to the database."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO messages (chat_id, sender, content) VALUES (?, ?, ?)",
-        (chat_id, sender, content),
-    )
-    conn.commit()
-    conn.close()
-
-
-def load_chat_history():
-    """Load all chat sessions and their metadata from the database."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM chats")
-    chats = cursor.fetchall()
-    conn.close()
-    return [
-        {
-            "id": chat[0],
-            "name": chat[1],
-            "last_message": chat[2],
-            "messages": load_messages(chat[0]),
-        }
-        for chat in chats
-    ]
-
-
-def load_messages(chat_id):
-    """Load all messages for a specific chat session from the database."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT sender, content FROM messages WHERE chat_id = ?", (chat_id,))
-    messages = cursor.fetchall()
-    conn.close()
-    return [ChatMessage(sender=msg[0], content=msg[1]) for msg in messages]
-
-
-# Initialize the session state variables
-if "current_chat" not in st.session_state:
-    st.session_state.current_chat = []  # Holds messages for the current chat session
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = (
-        load_chat_history()
-    )  # Load chat history from the database
-
-if "active_chat_id" not in st.session_state:
-    st.session_state.active_chat_id = None  # Track the ID of the active chat session
-
-# OpenAI model identifier
-LLM = "gpt-4o"  # Specify the OpenAI model to use
-# Initialize the OpenAI client
-client = OpenAI()
-
-# Sidebar for chat navigation and controls
+# Sidebar: Display existing chats and a new chat button
 with st.sidebar:
-    st.title("Chats Conversations")  # Title for the sidebar
-    if st.button("New Chat"):
-        # Create a new chat session
-        st.session_state.active_chat_id = str(uuid.uuid4())  # Generate a unique ID
-        st.session_state.current_chat = []  # Clear the current chat session
-        new_chat = {
-            "id": st.session_state.active_chat_id,
-            "name": f"Chat {len(st.session_state.chat_history) + 1}",
-            "messages": st.session_state.current_chat,
-            "last_message": "",
+    st.subheader("Conversations")
+
+    # Place 'New Chat' button at the top
+    if st.button("New Chat", key="new_chat_button"):
+        new_chat_uuid = str(uuid.uuid4())
+        first_msg = ChatMessage(sender=BOT, content="Hello, how can I help you?")
+        create_new_chat_in_db(new_chat_uuid, "New Chat", first_msg)
+
+        st.session_state["all_chats"][new_chat_uuid] = {
+            "name": "New Chat",
+            "messages": [first_msg],
         }
-        st.session_state.chat_history.append(new_chat)
-        save_chat_to_db(new_chat["id"], new_chat["name"], new_chat["last_message"])
+        st.session_state["selected_chat"] = new_chat_uuid
 
-    for chat in st.session_state.chat_history:
-        # Display each chat session with a preview of the last message
-        last_message_preview = chat.get("last_message", "No messages yet")[:30] + (
-            "..." if len(chat.get("last_message", "")) > 30 else ""
+    # Display existing chat sessions in reverse order so new ones appear at the top.
+    # Add a unique key parameter to each button to avoid duplicate IDs.
+    for chat_id in reversed(list(st.session_state["all_chats"].keys())):
+        chat_data = st.session_state["all_chats"][chat_id]
+        button_label = chat_data["name"]
+        if st.button(button_label, key=f"chat_button_{chat_id}"):
+            st.session_state["selected_chat"] = chat_id
+
+print(f"conversations : {st.session_state['all_chats']}")
+
+# If a chat is selected, display its conversation and the chat input
+if st.session_state["selected_chat"]:
+    chat_id = st.session_state["selected_chat"]
+    chat_data = st.session_state["all_chats"][chat_id]
+    chat_history = chat_data["messages"]
+
+    # Display chat history
+    for msg in chat_history:
+        if msg.sender == BOT:
+            st.chat_message("ai").write(msg.content)
+        else:
+            st.chat_message("human").write(msg.content)
+
+    # Functions for the chatbot
+    def ask_openai(
+        user_question: str,
+        temperature: float = 1.0,
+        top_p: float = 1.0,
+        max_tokens: int = 256,
+    ):
+        response = client.chat.completions.create(
+            model=LLM,
+            messages=[
+                {"role": "user", "content": user_question},
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            stream=True,
         )
-        if st.button(f"{chat['name']} - {last_message_preview}"):
-            st.session_state.active_chat_id = chat["id"]
-            st.session_state.current_chat = chat["messages"]
+        return response
 
+    def response_generator(user_question):
+        for chunk in ask_openai(user_question):
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content  # Stream response incrementally
 
-# Function to display the messages in the current chat
-def display_current_chat():
-    """Render all messages in the current chat session."""
-    for message in st.session_state.current_chat:
-        if message.content:
-            if message.sender == BOT:
-                st.chat_message("ai").write(message.content)  # Display bot message
-            elif message.sender == USER:
-                st.chat_message("human").write(message.content)  # Display user message
-
-
-# Function to send a request to OpenAI and receive a response
-def ask_openai(
-    user_question: str,
-    temperature: float = 1.0,
-    top_p: float = 1.0,
-    max_tokens: int = 256,
-):
-    """Send a user question to OpenAI and get a streamed response."""
-    response = client.chat.completions.create(
-        model=LLM,
-        messages=[{"role": "user", "content": user_question}],
-        temperature=temperature,
-        max_tokens=max_tokens,
-        top_p=top_p,
-        stream=True,
-    )
-    return response
-
-
-# Function to generate responses incrementally for smoother streaming
-def response_generator(user_question):
-    """Yield incremental responses from OpenAI for a smoother experience."""
-    for chunk in ask_openai(user_question):
-        if chunk.choices and chunk.choices[0].delta.content:
-            yield chunk.choices[0].delta.content
-
-
-# Main function to run the chat application
-def run():
-    """Main function to handle user interaction and chat flow."""
-    display_current_chat()  # Show the current chat messages
-    if st.session_state.active_chat_id:
-        prompt = st.chat_input("Add your prompt...")  # Input for user messages
+    # Main app logic to handle user input
+    def run():
+        prompt = st.chat_input("Add your prompt...")
         if prompt:
-            st.chat_message("user").write(prompt)  # Display the user input
-            output = response_generator(prompt)  # Get the AI response incrementally
-            st.session_state.current_chat.append(
-                ChatMessage(content=prompt, sender=USER)
-            )  # Save user message
-            save_message_to_db(
-                st.session_state.active_chat_id, USER, prompt
-            )  # Persist user message
+            # Optionally, rename the conversation using the last user prompt
+            st.session_state["all_chats"][chat_id]["name"] = prompt
+            update_chat_name_in_db(chat_id, prompt)
+
+            # Display user message
+            st.chat_message("human").write(prompt)
+
+            # Save user message
+            user_msg = ChatMessage(content=prompt, sender=USER)
+            chat_history.append(user_msg)
+            add_message_to_db(chat_id, user_msg)
+
+            # Generate response
+            output = response_generator(prompt)
             with st.chat_message("ai"):
-                ai_message = st.write_stream(output)  # Stream and display AI response
-            st.session_state.current_chat.append(
-                ChatMessage(content=ai_message, sender=BOT)
-            )  # Save AI response
-            save_message_to_db(
-                st.session_state.active_chat_id, BOT, ai_message
-            )  # Persist AI response
-            for chat in st.session_state.chat_history:
-                if chat["id"] == st.session_state.active_chat_id:
-                    chat["last_message"] = prompt  # Update last message for the chat
-                    save_chat_to_db(
-                        chat["id"], chat["name"], prompt
-                    )  # Persist updated chat metadata
+                ai_message = st.write_stream(output)
 
+            bot_msg = ChatMessage(content=ai_message, sender=BOT)
+            chat_history.append(bot_msg)
+            add_message_to_db(chat_id, bot_msg)
 
-# Entry point for the application
-if __name__ == "__main__":
-    run()  # Start the application
+    if __name__ == "__main__":
+        run()
+else:
+    st.write("Select or create a new chat from the sidebar to begin.")
 
-# ChatGPT Link
-
-# Persistance : https://chatgpt.com/share/6790dd84-dc70-8010-bb4e-6432421fe118
-# Display the chat input only if there is an active_chat_id : https://chatgpt.com/share/6790dd84-dc70-8010-bb4e-6432421fe118
+# chatgpt - link
+# https://chatgpt.com/share/679f8b39-facc-8010-9357-566deeae424e
