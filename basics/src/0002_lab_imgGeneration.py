@@ -84,7 +84,29 @@ def display_images(image_paths, titles=None, output_path="output/comparison.png"
     # 4. Save the comparison image instead of showing it (to avoid PyCharm backend issues)
     # 5. Try to open the saved image file using PIL
 
-    # Your code here
+    n_images = len(image_paths)
+    fig, axes = plt.subplots(1, n_images, figsize=(8 * n_images, 8))
+
+    try:
+        for i, (path, title) in enumerate(zip(image_paths, titles)):
+            img = Image.open(path)
+            axes[i].imshow(img)
+            axes[i].set_title(title)
+            axes[i].axis('off')  # Hide axes
+
+        plt.tight_layout()
+        plt.savefig(output_path)
+        plt.close()
+
+        comparison_img = Image.open(output_path)
+        comparison_img.show()
+
+        return output_path
+
+    except Exception as e:
+        print(f"Error displaying images: {str(e)}")
+        plt.close()
+        return None
 
 
 def main():
@@ -98,7 +120,7 @@ def main():
     # 4. Display all generated images
     # 5. Print a summary of what was learned about the API's capabilities
 
-    # Your code here
+    
 
 
 if __name__ == "__main__":
