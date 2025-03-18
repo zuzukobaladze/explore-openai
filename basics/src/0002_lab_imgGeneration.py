@@ -5,6 +5,7 @@ from openai import OpenAI
 from PIL import Image
 from io import BytesIO
 import matplotlib.pyplot as plt
+import datetime
 
 load_dotenv()
 client = OpenAI()
@@ -17,21 +18,39 @@ def generate_image(prompt, style="vivid", size="1024x1024", quality="standard"):
     # 3. Pass in the prompt, style, size, quality, and set n=1 (for 1 image)
     # 4. Return the API response
 
-    # Your code here
+    response = client.images.generate(
+        model="dall-e-3",
+        prompt=prompt,
+        style=style,
+        size=size,
+        quality=quality,
+        n=1
+    )
 
-    return None  # Replace with your implementation
+    url = response.data[0].url
+    print(url)
+    return url  # Replace with your implementation
 
 
 def save_image(image_url, filename):
-    # TODO: Task 2 - Download and save the image
-    # 1. Make a GET request to download the image from the URL
-    # 2. Create necessary directories if they don't exist
-    # 3. Save the image to the specified filename
-    # 4. Return the filename
 
-    # Your code here
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+    base_output_dir = "output"
+    os.makedirs(base_output_dir, exist_ok=True)
 
-    return filename
+    if not filename:
+        filename = f"{timestamp}_generated.png"
+
+    full_file_path = os.path.join(base_output_dir, filename)
+
+    response = requests.get(image_url)
+
+    if response.status_code == 200:
+        image = Image.open(BytesIO(response.content))
+        image.save(full_file_path)
+        return full_file_path
+    else:
+        raise Exception(f"Failed to download image. Status code: {response.status_code}")
 
 
 def compare_styles(prompt, output_dir="output"):
@@ -43,9 +62,15 @@ def compare_styles(prompt, output_dir="output"):
     # 5. Print the revised prompts for comparison
     # 6. Return the paths to both saved images
 
-    # Your code here
+    image1_prompt = "A Bloodborne character emoting on defeated boss"
+    image1_url = generate_image(image1_prompt)
+    image1_path = save_image(image1_url, "bb_image")
 
-    return None, None  # Replace with your implementation
+    image2_prompt = "An Elden Ring character emoting on defeated boss"
+    image2_url = generate_image(image2_prompt)
+    image2_path = save_image(image2_url, "er_image")
+
+    return image1_path, image2_path
 
 
 def display_images(image_paths, titles=None, output_path="output/comparison.png"):
